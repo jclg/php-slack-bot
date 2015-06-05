@@ -1,0 +1,20 @@
+{
+    "name": "jclg/php-slack-bot",
+    "description": "Slack bot user written in PHP",
+    "require": {
+        "php": ">=5.3.0",
+        "devristo/phpws": "dev-master"
+    },
+    "authors": [
+        {
+            "name": "jclg",
+            "email": "jeancharleslegoff@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "autoload": {
+        "psr-0": {
+            "PhpSlackBot": "src/"
+        }
+    }
+}
