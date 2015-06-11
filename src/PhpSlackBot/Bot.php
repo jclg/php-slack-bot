@@ -6,6 +6,7 @@ class Bot {
     private $params = array();
     private $context = array();
     private $wsUrl;
+    private $commands = array();
 
     public function setToken($token) {
         $this->params = array('token' => $token);
@@ -15,6 +16,7 @@ class Bot {
         if (!isset($this->params['token'])) {
             throw new \Exception('A token must be set. Please see https://my.slack.com/services/new/bot');
         }
+        $this->loadCommands();
         $this->init();
         $logger = new \Zend\Log\Logger();
         $writer = new \Zend\Log\Writer\Stream("php://output");
@@ -38,10 +40,14 @@ class Bot {
         $client->on("message", function($message) use ($client, $logger){
             $data = $message->getData();
             $logger->notice("Got message: ".$data);
-
             $data = json_decode($data, true);
-            if (isset($data['type']) && $data['type'] == 'message' && isset($data['text']) && strpos($data['text'], '<@'.$this->context['self']['id'].'>') === 0 && isset($data['channel'])) {
-                $client->send('{"id": '.time().',"type": "message","channel": "'.$data['channel'].'","text": "<@'.$data['user'].'> Pong"}');
+
+            $command = $this->getCommand($data);
+            if ($command instanceof Command\BaseCommand) {
+                $response = $command->executeCommand($data, $this->context);
+                if (!empty($response)) {
+                    $client->send(json_encode($response));
+                }
             }
         });
 
@@ -63,6 +69,23 @@ class Bot {
             throw new \Exception($response['error']);
         }
         $this->wsUrl = $response['url'];
+    }
+
+    private function loadCommands() {
+        $command = new \PhpSlackBot\Command\PingPongCommand;
+        $this->commands[$command->getName()] = $command;
+    }
+
+    private function getCommand($data) {
+        if (isset($data['text']) && strpos($data['text'], '<@'.$this->context['self']['id'].'>') === 0) {
+            $startText = trim(substr($data['text'], strlen('<@'.$this->context['self']['id'].'>')));
+            foreach ($this->commands as $commandName => $availableCommand) {
+                if (stripos($startText, $commandName) === 0) {
+                    return $this->commands[$commandName];
+                }
+            }
+        }
+        return null;
     }
 
 }
