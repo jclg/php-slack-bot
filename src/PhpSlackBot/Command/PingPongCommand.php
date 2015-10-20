@@ -8,13 +8,7 @@ class PingPongCommand extends BaseCommand {
     }
 
     protected function execute($message, $context) {
-        $response = array(
-                          'id' => time(),
-                          'type' => 'message',
-                          'channel' => $message['channel'],
-                          'text' => '<@'.$message['user'].'> Pong'
-                          );
-        return $response;
+        $this->send($this->getCurrentChannel(), $this->getCurrentUser(), 'Pong');
     }
 
 }

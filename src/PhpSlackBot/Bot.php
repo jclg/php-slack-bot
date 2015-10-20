@@ -44,10 +44,10 @@ class Bot {
 
             $command = $this->getCommand($data);
             if ($command instanceof Command\BaseCommand) {
-                $response = $command->executeCommand($data, $this->context);
-                if (!empty($response)) {
-                    $client->send(json_encode($response));
-                }
+                $command->setClient($client);
+                $command->setChannel($data['channel']);
+                $command->setUser($data['user']);
+                $command->executeCommand($data, $this->context);
             }
         });
 
@@ -72,8 +72,14 @@ class Bot {
     }
 
     private function loadCommands() {
-        $command = new \PhpSlackBot\Command\PingPongCommand;
-        $this->commands[$command->getName()] = $command;
+        $commands = array(
+                          new \PhpSlackBot\Command\PingPongCommand,
+                          new \PhpSlackBot\Command\CountCommand,
+                          new \PhpSlackBot\Command\PokerPlanningCommand,
+                          );
+        foreach ($commands as $command) {
+            $this->commands[$command->getName()] = $command;
+        }
     }
 
     private function getCommand($data) {
