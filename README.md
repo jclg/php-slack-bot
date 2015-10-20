@@ -21,10 +21,11 @@ Then run
 
 ## Usage
 
-    <?php
+```php
     require 'vendor/autoload.php';
     use PhpSlackBot\Bot;
 
     $bot = new Bot();
     $bot->setToken('TOKEN'); // Get your token here https://my.slack.com/services/new/bot
     $bot->run();
+```
