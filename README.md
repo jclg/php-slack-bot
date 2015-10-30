@@ -22,10 +22,38 @@ Then run
 ## Usage
 
 ```php
-    require 'vendor/autoload.php';
-    use PhpSlackBot\Bot;
+require 'vendor/autoload.php';
+use PhpSlackBot\Bot;
 
-    $bot = new Bot();
-    $bot->setToken('TOKEN'); // Get your token here https://my.slack.com/services/new/bot
-    $bot->run();
+$bot = new Bot();
+$bot->setToken('TOKEN'); // Get your token here https://my.slack.com/services/new/bot
+$bot->run();
 ```
+
+## Example commands
+
+Example commands are located in `src/PhpSlackBot/Command/`
+
+##### Ping Pong Command
+
+Type `ping` in a channel and the bot should answer "Pong" to you.
+
+##### Count Command
+
+Type `count` several times in a channel and the bot should answer with 1 then 2...
+
+##### Date Command
+
+Type `date` in a channel and the current date.
+
+##### Planning Poker Command
+
+https://en.wikipedia.org/wiki/Planning_poker
+
+Type `pokerp start` in a public channel with your team in order to start a planning poker session.
+
+Direct message the bot with `pokerp vote number`. The bot will record your vote.
+
+Type `pokerp status` to see the current status of the session (who has voted).
+
+Type `pokerp end` in a public channel and the bot will output each vote.
