@@ -47,6 +47,7 @@ class Bot {
                 $command->setClient($client);
                 $command->setChannel($data['channel']);
                 $command->setUser($data['user']);
+                $command->setContext($this->context);
                 $command->executeCommand($data, $this->context);
             }
         });

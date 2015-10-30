@@ -5,6 +5,7 @@ abstract class BaseCommand {
     private $name;
     private $client;
     private $user;
+    private $context;
     abstract protected function configure();
     abstract protected function execute($message, $context);
 
@@ -37,6 +38,14 @@ abstract class BaseCommand {
         return $this->user;
     }
 
+    public function setContext($context) {
+        $this->context = $context;
+    }
+
+    public function getCurrentContext() {
+        return $this->context;
+    }
+
     public function getCurrentChannel() {
         return $this->channel;
     }
@@ -49,5 +58,15 @@ abstract class BaseCommand {
                           'text' => (!is_null($username) ? '<@'.$username.'> ' : '').$message
                           );
         $this->client->send(json_encode($response));
+    }
+
+    protected function getUsernameFromUserId($userId) {
+        $username = 'unknown';
+        foreach ($this->context['users'] as $user) {
+            if ($user['id'] == $userId) {
+                $username = $user['name'];
+            }
+        }
+        return $username;
     }
 }
