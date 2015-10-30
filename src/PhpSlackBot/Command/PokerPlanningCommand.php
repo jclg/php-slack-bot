@@ -42,7 +42,7 @@ class PokerPlanningCommand extends BaseCommand {
             $this->initiator = $this->getCurrentUser();
             $this->scores = array();
             $this->send($this->getCurrentChannel(), null,
-                        'Poker planning sessions start by '.$this->initiator."\n".
+                        'Poker planning sessions start by '.$this->getUsernameFromUserId($this->initiator)."\n".
                         'Please vote'.(!is_null($this->subject) ? ' for '.$this->subject : ''));
             $this->send($this->getCurrentChannel(), $this->getCurrentUser(), 'Use "pokerplanning end" to end the session');
         }
@@ -54,7 +54,7 @@ class PokerPlanningCommand extends BaseCommand {
     private function status() {
         $message = 'Current status : '.$this->status;
         if ($this->status == 'running') {
-            $message .= "\n".'Initiator : '.$this->initiator;
+            $message .= "\n".'Initiator : '.$this->getUsernameFromUserId($this->initiator);
         }
         $this->send($this->getCurrentChannel(), null, $message);
         if ($this->status == 'running') {
@@ -64,7 +64,7 @@ class PokerPlanningCommand extends BaseCommand {
             else {
                 $message = '';
                 foreach ($this->scores as $user => $score) {
-                    $message .= $user.' has voted'."\n";
+                    $message .= $this->getUsernameFromUserId($user).' has voted'."\n";
                 }
                 $this->send($this->getCurrentChannel(), null, $message);
             }
@@ -92,22 +92,22 @@ class PokerPlanningCommand extends BaseCommand {
     private function end() {
         if ($this->status == 'running') {
             if ($this->getCurrentUser() == $this->initiator) {
-                $message = 'Ending session'."\n".'Results : '."\n";
+                $message = 'Ending session'.(!is_null($this->subject) ? ' for '.$this->subject : '')."\n".'Results : '."\n";
                 if (empty($this->scores)) {
                     $message .= 'No vote !';
                 }
                 else {
                     foreach ($this->scores as $user => $score) {
-                        $message .= $user.' => '.$score."\n";
+                        $message .= $this->getUsernameFromUserId($user).' => '.$score."\n";
                     }
                     $message .= '------------------'."\n";
                     $message .= 'Average score : '.(array_sum($this->scores) / count($this->scores));
                 }
                 $this->send($this->getCurrentChannel(), null, $message);
-                $this->status == 'free';
+                $this->status = 'free';
             }
             else {
-                $this->send($this->getCurrentChannel(), $this->getCurrentUser(), 'Only '.$this->initiator.' can end the session');
+                $this->send($this->getCurrentChannel(), $this->getCurrentUser(), 'Only '.$this->getUsernameFromUserId($this->initiator).' can end the session');
             }
         }
         else {
