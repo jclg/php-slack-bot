@@ -9,12 +9,12 @@ class PokerPlanningCommand extends BaseCommand {
     private $status = 'free';
 
     protected function configure() {
-        $this->setName('pokerplanning');
+        $this->setName('pokerp');
     }
 
     protected function execute($message, $context) {
         $args = $this->getArgs($message);
-        $command = isset($args[2]) ? $args[2] : '';
+        $command = isset($args[1]) ? $args[1] : '';
 
         switch ($command) {
         case 'start':
@@ -31,20 +31,20 @@ class PokerPlanningCommand extends BaseCommand {
             break;
         default:
             $this->send($this->getCurrentChannel(), $this->getCurrentUser(),
-                        'No comprendo. Use "pokerplanning start" or "pokerplanning status"');
+                        'No comprendo. Use "'.$this->getName().' start" or "'.$this->getName().' status"');
         }
     }
 
     private function start($args) {
         if ($this->status == 'free') {
-            $this->subject = isset($args[3]) ? $args[3] : null;
+            $this->subject = isset($args[2]) ? $args[2] : null;
             $this->status = 'running';
             $this->initiator = $this->getCurrentUser();
             $this->scores = array();
             $this->send($this->getCurrentChannel(), null,
                         'Poker planning sessions start by '.$this->getUsernameFromUserId($this->initiator)."\n".
                         'Please vote'.(!is_null($this->subject) ? ' for '.$this->subject : ''));
-            $this->send($this->getCurrentChannel(), $this->getCurrentUser(), 'Use "pokerplanning end" to end the session');
+            $this->send($this->getCurrentChannel(), $this->getCurrentUser(), 'Use "'.$this->getName().' end" to end the session');
         }
         else {
             $this->send($this->getCurrentChannel(), $this->getCurrentUser(), 'A poker session is still active');
@@ -73,10 +73,10 @@ class PokerPlanningCommand extends BaseCommand {
 
     private function vote($args) {
         if ($this->status == 'running') {
-            $score = isset($args[3]) ? $args[3] : -1;
+            $score = isset($args[2]) ? $args[2] : -1;
             $sequence = $this->getSequence();
             if (!in_array($score, $sequence)) {
-                $this->send($this->getCurrentChannel(), $this->getCurrentUser(), 'Use "pokerplanning vote [number]". Choose [number] between '.implode(', ',$sequence));
+                $this->send($this->getCurrentChannel(), $this->getCurrentUser(), 'Use "'.$this->getName().' vote [number]". Choose [number] between '.implode(', ',$sequence));
             }
             else {
                 $this->scores[$this->getCurrentUser()] = (int) $score;
@@ -85,7 +85,7 @@ class PokerPlanningCommand extends BaseCommand {
             }
         }
         else {
-            $this->send($this->getCurrentChannel(), $this->getCurrentUser(), 'There is no poker session. You can start one with "pokerplanning start"');
+            $this->send($this->getCurrentChannel(), $this->getCurrentUser(), 'There is no poker session. You can start one with "'.$this->getName().' start"');
         }
     }
 
@@ -111,7 +111,7 @@ class PokerPlanningCommand extends BaseCommand {
             }
         }
         else {
-            $this->send($this->getCurrentChannel(), $this->getCurrentUser(), 'There is no poker session. You can start one with "pokerplanning start"');
+            $this->send($this->getCurrentChannel(), $this->getCurrentUser(), 'There is no poker session. You can start one with "'.$this->getName().' start"');
         }
     }
 
@@ -120,7 +120,19 @@ class PokerPlanningCommand extends BaseCommand {
         if (isset($message['text'])) {
             $args = array_values(array_filter(explode(' ', $message['text'])));
         }
-        return $args;
+        $commandName = $this->getName();
+        // Remove args which are before the command name
+        $finalArgs = array();
+        $remove = true;
+        foreach ($args as $arg) {
+            if ($commandName == $arg) {
+                $remove = false;
+            }
+            if (!$remove) {
+                $finalArgs[] = $arg;
+            }
+        }
+        return $finalArgs;
     }
 
     private function getSequence() {
