@@ -84,11 +84,17 @@ class Bot {
     }
 
     private function getCommand($data) {
-        if (isset($data['text']) && strpos($data['text'], '<@'.$this->context['self']['id'].'>') === 0) {
-            $startText = trim(substr($data['text'], strlen('<@'.$this->context['self']['id'].'>')));
-            foreach ($this->commands as $commandName => $availableCommand) {
-                if (stripos($startText, $commandName) === 0) {
-                    return $this->commands[$commandName];
+        if (isset($data['text'])) {
+            $argsOffset = 0;
+            if (strpos($data['text'], '<@'.$this->context['self']['id'].'>') === 0) {
+                $argsOffset = 1;
+            }
+            $args = array_values(array_filter(explode(' ', $data['text'])));
+            if (isset($args[$argsOffset])) {
+                foreach ($this->commands as $commandName => $availableCommand) {
+                    if (stripos($args[$argsOffset], $commandName) === 0) {
+                        return $this->commands[$commandName];
+                    }
                 }
             }
         }
