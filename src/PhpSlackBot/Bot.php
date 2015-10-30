@@ -76,6 +76,7 @@ class Bot {
         $commands = array(
                           new \PhpSlackBot\Command\PingPongCommand,
                           new \PhpSlackBot\Command\CountCommand,
+                          new \PhpSlackBot\Command\DateCommand,
                           new \PhpSlackBot\Command\PokerPlanningCommand,
                           );
         foreach ($commands as $command) {
