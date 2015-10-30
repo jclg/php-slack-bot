@@ -38,6 +38,9 @@ class PokerPlanningCommand extends BaseCommand {
     private function start($args) {
         if ($this->status == 'free') {
             $this->subject = isset($args[2]) ? $args[2] : null;
+            if (!is_null($this->subject)) {
+                $this->subject = str_replace(array('<', '>'), '', $this->subject);
+            }
             $this->status = 'running';
             $this->initiator = $this->getCurrentUser();
             $this->scores = array();
@@ -101,7 +104,8 @@ class PokerPlanningCommand extends BaseCommand {
                         $message .= $this->getUsernameFromUserId($user).' => '.$score."\n";
                     }
                     $message .= '------------------'."\n";
-                    $message .= 'Average score : '.(array_sum($this->scores) / count($this->scores));
+                    $message .= 'Average score : '.$this->getAverageScore()."\n";
+                    $message .= 'Median score : '.$this->getMedianScore();
                 }
                 $this->send($this->getCurrentChannel(), null, $message);
                 $this->status = 'free';
@@ -135,8 +139,28 @@ class PokerPlanningCommand extends BaseCommand {
         return $finalArgs;
     }
 
+    private function getAverageScore() {
+        return array_sum($this->scores) / count($this->scores);
+    }
+
+    private function getMedianScore() {
+        $arr = $this->scores;
+        sort($arr);
+        $count = count($arr);
+        $middleval = floor(($count-1)/2);
+        if($count % 2) {
+            $median = $arr[$middleval];
+        }
+        else {
+            $low = $arr[$middleval];
+            $high = $arr[$middleval+1];
+            $median = (($low+$high)/2);
+        }
+        return $median;
+    }
+
     private function getSequence() {
-        return array(0, 1, 2, 3, 5, 8, 13, 20);
+        return array(0, 1, 2, 3, 5, 8, 13, 20, 40, 100);
     }
 
 }
