@@ -12,7 +12,6 @@ class CountCommand extends BaseCommand {
     protected function execute($message, $context) {
         $this->send($this->getCurrentChannel(), null, $this->count);
         $this->count++;
-        return $response;
     }
 
 }
