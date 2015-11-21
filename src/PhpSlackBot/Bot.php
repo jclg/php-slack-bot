@@ -12,11 +12,20 @@ class Bot {
         $this->params = array('token' => $token);
     }
 
+    public function loadCommand($command) {
+        if ($command instanceof Command\BaseCommand) {
+            $this->commands[$command->getName()] = $command;
+        }
+        else {
+            throw new \Exception('Command must implement PhpSlackBot\Command\BaseCommand');
+        }
+    }
+
     public function run() {
         if (!isset($this->params['token'])) {
             throw new \Exception('A token must be set. Please see https://my.slack.com/services/new/bot');
         }
-        $this->loadCommands();
+        $this->loadInternalCommands();
         $this->init();
         $logger = new \Zend\Log\Logger();
         $writer = new \Zend\Log\Writer\Stream("php://output");
@@ -72,7 +81,7 @@ class Bot {
         $this->wsUrl = $response['url'];
     }
 
-    private function loadCommands() {
+    private function loadInternalCommands() {
         $commands = array(
                           new \PhpSlackBot\Command\PingPongCommand,
                           new \PhpSlackBot\Command\CountCommand,
@@ -80,7 +89,9 @@ class Bot {
                           new \PhpSlackBot\Command\PokerPlanningCommand,
                           );
         foreach ($commands as $command) {
-            $this->commands[$command->getName()] = $command;
+            if (!isset($this->commands[$command->getName()])) {
+                $this->commands[$command->getName()] = $command;
+            }
         }
     }
 
