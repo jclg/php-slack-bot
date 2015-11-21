@@ -71,3 +71,9 @@ Direct message the bot with `pokerp vote number`. The bot will record your vote.
 Type `pokerp status` to see the current status of the session (who has voted).
 
 Type `pokerp end` in a public channel and the bot will output each vote.
+
+## Load your own commands
+
+You can load your own commands by implementing the \PhpSlackBot\Command\BaseCommand.
+
+Then call PhpSlackBot\Bot::loadCommand method for each command you have to load.
