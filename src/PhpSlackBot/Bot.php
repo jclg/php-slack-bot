@@ -71,9 +71,15 @@ class Bot {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url.'?'.http_build_query($this->params));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        $response = curl_exec($ch);
+        $body = curl_exec($ch);
+        if ($body === false) {
+            throw new \Exception('Error when requesting '.$url.' '.curl_error($ch));
+        }
         curl_close($ch);
-        $response = json_decode($response, true);
+        $response = json_decode($body, true);
+        if (is_null($response)) {
+            throw new \Exception('Error when decoding body ('.$body.').');
+        }
         $this->context = $response;
         if (isset($response['error'])) {
             throw new \Exception($response['error']);
