@@ -3,7 +3,8 @@
     "description": "Slack bot user written in PHP",
     "homepage": "https://github.com/jclg/php-slack-bot",
     "require": {
-        "devristo/phpws": "dev-master"
+        "devristo/phpws": "dev-master",
+        "react/http": "dev-master"
     },
     "authors": [
         {
