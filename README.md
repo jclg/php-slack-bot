@@ -77,3 +77,30 @@ Type `pokerp end` in a public channel and the bot will output each vote.
 You can load your own commands by implementing the \PhpSlackBot\Command\BaseCommand.
 
 Then call PhpSlackBot\Bot::loadCommand method for each command you have to load.
+
+
+## Incoming webhooks
+
+The bot can also listen for incoming webhooks.
+
+Commands are triggered from users messages inside Slack and webhooks are triggered from web post requests.
+
+Custom webhooks can be loaded using the PhpSlackBot\Bot::loadWebhook method.
+
+This is useful if you need to control the bot from an external service. For example, with IFTTT https://ifttt.com/maker
+
+To enable webhooks, use the enableWebserver method before the run method.
+
+You can also set a secret token to prevent unauthorized requests.
+
+
+```php
+$bot->enableWebserver(8080, 'secret'); // This will listen on port 8080
+$bot->run();
+```
+
+Then, use the parameter "name" to trigger the corresponding webhook :
+
+```
+curl -X POST --data-urlencode 'auth=secret' --data-urlencode 'name=output' --data-urlencode 'payload={"type" : "message", "text": "This is a message", "channel": "#general"}' http://localhost:8080
+```
