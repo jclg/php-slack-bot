@@ -7,7 +7,9 @@ class Bot {
     private $context = array();
     private $wsUrl;
     private $commands = array();
-    private $webserverPort = false;
+    private $webhooks = array();
+    private $webserverPort = null;
+    private $webserverAuthentificationToken = null;
 
     public function setToken($token) {
         $this->params = array('token' => $token);
@@ -22,8 +24,18 @@ class Bot {
         }
     }
 
-    public function enableWebserver($port) {
-        $this->webserverPort = 8080;
+    public function loadWebhook($webhook) {
+        if ($webhook instanceof Webhook\BaseWebhook) {
+            $this->webhooks[$webhook->getName()] = $webhook;
+        }
+        else {
+            throw new \Exception('Webhook must implement PhpSlackBot\Webhook\BaseWebhook');
+        }
+    }
+
+    public function enableWebserver($port, $authentificationToken = null) {
+        $this->webserverPort = $port;
+        $this->authentificationToken = $authentificationToken;
     }
 
     public function run() {
@@ -70,22 +82,35 @@ class Bot {
         $client->open();
 
         /* Webserver */
-        if ($this->webserverPort !== false) {
+        if (null !== $this->webserverPort) {
+            $this->loadInternalWebhooks();
             $logger->notice("Listening on port ".$this->webserverPort);
             $socket = new \React\Socket\Server($loop);
             $http = new \React\Http\Server($socket);
             $http->on('request', function ($request, $response) use ($client) {
                 $post = $request->getPost();
-                if ($post['name'] == 'output') {
-                    $hook = new \PhpSlackBot\Webhook\OutputWebhook();
-                    $hook->setClient($client);
-                    $hook->setContext($this->context);
-                    $hook->executeWebhook(json_decode($post['payload'], true));
+                if ($this->authentificationToken === null || ($this->authentificationToken !== null &&
+                                                              isset($post['auth']) &&
+                                                              $post['auth'] === $this->authentificationToken)) {
+                    if (isset($post['name']) && is_string($post['name']) && isset($this->webhooks[$post['name']])) {
+                        $hook = $this->webhooks[$post['name']];
+                        $hook->setClient($client);
+                        $hook->setContext($this->context);
+                        $hook->executeWebhook(json_decode($post['payload'], true), $this->context);
+                        $response->writeHead(200, array('Content-Type' => 'text/plain'));
+                        $response->end("Ok\n");
+                    }
+                    else {
+                        $response->writeHead(404, array('Content-Type' => 'text/plain'));
+                        $response->end("No webhook found\n");
+                    }
                 }
-                $response->writeHead(200, array('Content-Type' => 'text/plain'));
-                $response->end("Ok\n");
+                else {
+                    $response->writeHead(403, array('Content-Type' => 'text/plain'));
+                    $response->end("");
+                }
             });
-            $socket->listen(8080);
+            $socket->listen($this->webserverPort);
         }
 
         $loop->run();
@@ -122,6 +147,17 @@ class Bot {
         foreach ($commands as $command) {
             if (!isset($this->commands[$command->getName()])) {
                 $this->commands[$command->getName()] = $command;
+            }
+        }
+    }
+
+    private function loadInternalWebhooks() {
+        $webhooks = array(
+                          new \PhpSlackBot\Webhook\OutputWebhook,
+                          );
+        foreach ($webhooks as $webhook) {
+            if (!isset($this->webhooks[$webhook->getName()])) {
+                $this->webhooks[$webhook->getName()] = $webhook;
             }
         }
     }
