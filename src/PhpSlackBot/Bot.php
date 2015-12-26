@@ -10,6 +10,7 @@ class Bot {
     private $webhooks = array();
     private $webserverPort = null;
     private $webserverAuthentificationToken = null;
+    private $catchAllCommand = null;
 
     public function setToken($token) {
         $this->params = array('token' => $token);
@@ -30,6 +31,15 @@ class Bot {
         }
         else {
             throw new \Exception('Webhook must implement PhpSlackBot\Webhook\BaseWebhook');
+        }
+    }
+
+    public function loadCatchAllCommand($command) {
+        if ($command instanceof Command\BaseCommand) {
+            $this->catchAllCommand = $command;
+        }
+        else {
+            throw new \Exception('Command must implement PhpSlackBot\Command\BaseCommand');
         }
     }
 
@@ -68,13 +78,21 @@ class Bot {
             $logger->notice("Got message: ".$data);
             $data = json_decode($data, true);
 
-            $command = $this->getCommand($data);
-            if ($command instanceof Command\BaseCommand) {
+            if (null !== $this->catchAllCommand) {
+                $command = $this->catchAllCommand;
                 $command->setClient($client);
-                $command->setChannel($data['channel']);
-                $command->setUser($data['user']);
                 $command->setContext($this->context);
                 $command->executeCommand($data, $this->context);
+            }
+            else {
+                $command = $this->getCommand($data);
+                if ($command instanceof Command\BaseCommand) {
+                    $command->setClient($client);
+                    $command->setChannel($data['channel']);
+                    $command->setUser($data['user']);
+                    $command->setContext($this->context);
+                    $command->executeCommand($data, $this->context);
+                }
             }
         });
 

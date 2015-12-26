@@ -78,6 +78,38 @@ You can load your own commands by implementing the \PhpSlackBot\Command\BaseComm
 
 Then call PhpSlackBot\Bot::loadCommand method for each command you have to load.
 
+## "Catch All" command
+
+If you need to execute a command when an event occurs, you can set up a "catch all" command.
+
+This special command will be triggered on all events and all other commands will be ignored.
+
+```php
+require 'vendor/autoload.php';
+use PhpSlackBot\Bot;
+
+// This special command executes on all events
+class SuperCommand extends \PhpSlackBot\Command\BaseCommand {
+
+    protected function configure() {
+        // We don't have to configure a command name in this case
+    }
+
+    protected function execute($data, $context) {
+        if ($data['type'] == 'message') {
+            $channel = $this->getChannelNameFromChannelId($data['channel']);
+            $username = $this->getUserNameFromUserId($data['user']);
+            echo $username.' from '.($channel ? $channel : 'DIRECT MESSAGE').' : '.$data['text'].PHP_EOL;
+        }
+    }
+
+}
+
+$bot = new Bot();
+$bot->setToken('TOKEN'); // Get your token here https://my.slack.com/services/new/bot
+$bot->loadCatchAllCommand(new SuperCommand());
+$bot->run();
+```
 
 ## Incoming webhooks
 
