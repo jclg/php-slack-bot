@@ -45,7 +45,7 @@ class PokerPlanningCommand extends BaseCommand {
             $this->initiator = $this->getCurrentUser();
             $this->scores = array();
             $this->send($this->getCurrentChannel(), null,
-                        'Poker planning sessions start by '.$this->getUsernameFromUserId($this->initiator)."\n".
+                        'Poker planning sessions start by '.$this->getUserNameFromUserId($this->initiator)."\n".
                         'Please vote'.(!is_null($this->subject) ? ' for '.$this->subject : ''));
             $this->send($this->getCurrentChannel(), $this->getCurrentUser(), 'Use "'.$this->getName().' end" to end the session');
         }
@@ -57,7 +57,7 @@ class PokerPlanningCommand extends BaseCommand {
     private function status() {
         $message = 'Current status : '.$this->status;
         if ($this->status == 'running') {
-            $message .= "\n".'Initiator : '.$this->getUsernameFromUserId($this->initiator);
+            $message .= "\n".'Initiator : '.$this->getUserNameFromUserId($this->initiator);
         }
         $this->send($this->getCurrentChannel(), null, $message);
         if ($this->status == 'running') {
@@ -67,7 +67,7 @@ class PokerPlanningCommand extends BaseCommand {
             else {
                 $message = '';
                 foreach ($this->scores as $user => $score) {
-                    $message .= $this->getUsernameFromUserId($user).' has voted'."\n";
+                    $message .= $this->getUserNameFromUserId($user).' has voted'."\n";
                 }
                 $this->send($this->getCurrentChannel(), null, $message);
             }
@@ -101,7 +101,7 @@ class PokerPlanningCommand extends BaseCommand {
                 }
                 else {
                     foreach ($this->scores as $user => $score) {
-                        $message .= $this->getUsernameFromUserId($user).' => '.$score."\n";
+                        $message .= $this->getUserNameFromUserId($user).' => '.$score."\n";
                     }
                     $message .= '------------------'."\n";
                     $message .= 'Average score : '.$this->getAverageScore()."\n";
@@ -111,7 +111,7 @@ class PokerPlanningCommand extends BaseCommand {
                 $this->status = 'free';
             }
             else {
-                $this->send($this->getCurrentChannel(), $this->getCurrentUser(), 'Only '.$this->getUsernameFromUserId($this->initiator).' can end the session');
+                $this->send($this->getCurrentChannel(), $this->getCurrentUser(), 'Only '.$this->getUserNameFromUserId($this->initiator).' can end the session');
             }
         }
         else {

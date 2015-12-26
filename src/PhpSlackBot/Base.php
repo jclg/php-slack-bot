@@ -60,7 +60,7 @@ abstract class Base {
         $this->client->send(json_encode($response));
     }
 
-    protected function getUsernameFromUserId($userId) {
+    protected function getUserNameFromUserId($userId) {
         $username = 'unknown';
         foreach ($this->context['users'] as $user) {
             if ($user['id'] == $userId) {
@@ -75,6 +75,15 @@ abstract class Base {
         foreach ($this->context['channels'] as $channel) {
             if ($channel['name'] == $channelName) {
                 return $channel['id'];
+            }
+        }
+        return false;
+    }
+
+    protected function getChannelNameFromChannelId($channelId) {
+        foreach ($this->context['channels'] as $channel) {
+            if ($channel['id'] == $channelId) {
+                return $channel['name'];
             }
         }
         return false;
