@@ -54,7 +54,7 @@ abstract class Base {
         $response = array(
                           'id' => time(),
                           'type' => 'message',
-                          'channel' => $this->channel,
+                          'channel' => $channel,
                           'text' => (!is_null($username) ? '<@'.$username.'> ' : '').$message
                           );
         $this->client->send(json_encode($response));
