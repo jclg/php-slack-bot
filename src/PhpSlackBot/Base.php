@@ -89,4 +89,13 @@ abstract class Base {
         return false;
     }
 
+    protected function getImIdFromUserId($userId) {
+        foreach ($this->context['ims'] as $im) {
+            if ($im['user'] == $userId) {
+                return $im['id'];
+            }
+        }
+        return false;
+    }
+
 }
