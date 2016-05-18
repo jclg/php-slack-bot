@@ -105,7 +105,9 @@ class PokerPlanningCommand extends BaseCommand {
                     }
                     $message .= '------------------'."\n";
                     $message .= 'Average score : '.$this->getAverageScore()."\n";
-                    $message .= 'Median score : '.$this->getMedianScore();
+                    $message .= 'Median score : '.$this->getMedianScore()."\n";
+                    $message .= 'Max score : '.$this->getMaxScore()."\n";
+                    $message .= 'Min score : '.$this->getMinScore();
                 }
                 $this->send($this->getCurrentChannel(), null, $message);
                 $this->status = 'free';
@@ -161,6 +163,14 @@ class PokerPlanningCommand extends BaseCommand {
 
     private function getSequence() {
         return array(0, 1, 2, 3, 5, 8, 13, 20, 40, 100);
+    }
+
+    private function getMaxScore() {
+        return max($this->scores);
+    }
+
+    private function getMinScore() {
+        return min($this->scores);
     }
 
 }
