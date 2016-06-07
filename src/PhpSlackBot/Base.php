@@ -77,6 +77,11 @@ abstract class Base {
                 return $channel['id'];
             }
         }
+        foreach ($this->context['groups'] as $group) {
+            if ($group['name'] == $channelName) {
+                return $group['id'];
+            }
+        }
         return false;
     }
 
@@ -84,6 +89,11 @@ abstract class Base {
         foreach ($this->context['channels'] as $channel) {
             if ($channel['id'] == $channelId) {
                 return $channel['name'];
+            }
+        }
+        foreach ($this->context['groups'] as $group) {
+            if ($group['id'] == $channelId) {
+                return $group['name'];
             }
         }
         return false;
