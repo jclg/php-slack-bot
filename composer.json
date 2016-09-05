@@ -4,7 +4,7 @@
     "homepage": "https://github.com/jclg/php-slack-bot",
     "require": {
         "devristo/phpws": "dev-master",
-        "react/http": "dev-master"
+        "react/http": "dev-master#cd15204bd15d106d7832c680e4fb0ca0ce2f5e30"
     },
     "authors": [
         {
