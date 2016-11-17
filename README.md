@@ -46,7 +46,7 @@ $bot->run();
 
 ## Example commands
 
-Example commands are located in `src/PhpSlackBot/Command/`
+Example commands are located in `src/PhpSlackBot/Command/` and can be loaded with `$bot->loadInternalCommands();`
 
 ##### Ping Pong Command
 
@@ -82,7 +82,7 @@ Then call PhpSlackBot\Bot::loadCommand method for each command you have to load.
 
 If you need to execute a command when an event occurs, you can set up a "catch all" command.
 
-This special command will be triggered on all events and all other commands will be ignored.
+This special command will be triggered on all events.
 
 ```php
 require 'vendor/autoload.php';
@@ -127,6 +127,7 @@ You can also set a secret token to prevent unauthorized requests.
 
 
 ```php
+$bot->loadInternalWebhooks(); // Load the internal "output" webhook
 $bot->enableWebserver(8080, 'secret'); // This will listen on port 8080
 $bot->run();
 ```
