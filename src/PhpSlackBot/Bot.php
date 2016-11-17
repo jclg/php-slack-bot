@@ -10,7 +10,7 @@ class Bot {
     private $webhooks = array();
     private $webserverPort = null;
     private $webserverAuthentificationToken = null;
-    private $catchAllCommand = null;
+    private $catchAllCommands = array();
 
     public function setToken($token) {
         $this->params = array('token' => $token);
@@ -36,7 +36,7 @@ class Bot {
 
     public function loadCatchAllCommand($command) {
         if ($command instanceof Command\BaseCommand) {
-            $this->catchAllCommand = $command;
+            $this->catchAllCommands[] = $command;
         }
         else {
             throw new \Exception('Command must implement PhpSlackBot\Command\BaseCommand');
@@ -78,21 +78,20 @@ class Bot {
             $logger->notice("Got message: ".$data);
             $data = json_decode($data, true);
 
-            if (null !== $this->catchAllCommand) {
-                $command = $this->catchAllCommand;
+            if (count($this->catchAllCommands)) {
+              foreach ($this->catchAllCommands as $command) {
                 $command->setClient($client);
                 $command->setContext($this->context);
                 $command->executeCommand($data, $this->context);
+              }
             }
-            else {
-                $command = $this->getCommand($data);
-                if ($command instanceof Command\BaseCommand) {
-                    $command->setClient($client);
-                    $command->setChannel($data['channel']);
-                    $command->setUser($data['user']);
-                    $command->setContext($this->context);
-                    $command->executeCommand($data, $this->context);
-                }
+            $command = $this->getCommand($data);
+            if ($command instanceof Command\BaseCommand) {
+                $command->setClient($client);
+                $command->setChannel($data['channel']);
+                $command->setUser($data['user']);
+                $command->setContext($this->context);
+                $command->executeCommand($data, $this->context);
             }
         });
 
