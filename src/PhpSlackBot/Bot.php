@@ -85,15 +85,13 @@ class Bot {
                 $command->executeCommand($data, $this->context);
               }
             }
-            else {
-                $command = $this->getCommand($data);
-                if ($command instanceof Command\BaseCommand) {
-                    $command->setClient($client);
-                    $command->setChannel($data['channel']);
-                    $command->setUser($data['user']);
-                    $command->setContext($this->context);
-                    $command->executeCommand($data, $this->context);
-                }
+            $command = $this->getCommand($data);
+            if ($command instanceof Command\BaseCommand) {
+                $command->setClient($client);
+                $command->setChannel($data['channel']);
+                $command->setUser($data['user']);
+                $command->setContext($this->context);
+                $command->executeCommand($data, $this->context);
             }
         });
 
