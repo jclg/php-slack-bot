@@ -52,7 +52,6 @@ class Bot {
         if (!isset($this->params['token'])) {
             throw new \Exception('A token must be set. Please see https://my.slack.com/services/new/bot');
         }
-        $this->loadInternalCommands();
         $this->init();
         $logger = new \Zend\Log\Logger();
         $writer = new \Zend\Log\Writer\Stream("php://output");
@@ -100,7 +99,6 @@ class Bot {
 
         /* Webserver */
         if (null !== $this->webserverPort) {
-            $this->loadInternalWebhooks();
             $logger->notice("Listening on port ".$this->webserverPort);
             $socket = new \React\Socket\Server($loop);
             $http = new \React\Http\Server($socket);
@@ -156,7 +154,7 @@ class Bot {
         $this->wsUrl = $response['url'];
     }
 
-    private function loadInternalCommands() {
+    public function loadInternalCommands() {
         $commands = array(
                           new \PhpSlackBot\Command\PingPongCommand,
                           new \PhpSlackBot\Command\CountCommand,
@@ -170,7 +168,7 @@ class Bot {
         }
     }
 
-    private function loadInternalWebhooks() {
+    public function loadInternalWebhooks() {
         $webhooks = array(
                           new \PhpSlackBot\Webhook\OutputWebhook,
                           );
