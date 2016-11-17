@@ -105,27 +105,29 @@ class Bot {
             $socket = new \React\Socket\Server($loop);
             $http = new \React\Http\Server($socket);
             $http->on('request', function ($request, $response) use ($client) {
-                $post = $request->getPost();
-                if ($this->authentificationToken === null || ($this->authentificationToken !== null &&
-                                                              isset($post['auth']) &&
-                                                              $post['auth'] === $this->authentificationToken)) {
-                    if (isset($post['name']) && is_string($post['name']) && isset($this->webhooks[$post['name']])) {
-                        $hook = $this->webhooks[$post['name']];
-                        $hook->setClient($client);
-                        $hook->setContext($this->context);
-                        $hook->executeWebhook(json_decode($post['payload'], true), $this->context);
-                        $response->writeHead(200, array('Content-Type' => 'text/plain'));
-                        $response->end("Ok\n");
+                $request->on('data', function($data) use ($client, $request, $response) {
+                    parse_str($data, $post);
+                    if ($this->authentificationToken === null || ($this->authentificationToken !== null &&
+                                                                  isset($post['auth']) &&
+                                                                  $post['auth'] === $this->authentificationToken)) {
+                        if (isset($post['name']) && is_string($post['name']) && isset($this->webhooks[$post['name']])) {
+                            $hook = $this->webhooks[$post['name']];
+                            $hook->setClient($client);
+                            $hook->setContext($this->context);
+                            $hook->executeWebhook(json_decode($post['payload'], true), $this->context);
+                            $response->writeHead(200, array('Content-Type' => 'text/plain'));
+                            $response->end("Ok\n");
+                        }
+                        else {
+                            $response->writeHead(404, array('Content-Type' => 'text/plain'));
+                            $response->end("No webhook found\n");
+                        }
                     }
                     else {
-                        $response->writeHead(404, array('Content-Type' => 'text/plain'));
-                        $response->end("No webhook found\n");
+                        $response->writeHead(403, array('Content-Type' => 'text/plain'));
+                        $response->end("");
                     }
-                }
-                else {
-                    $response->writeHead(403, array('Content-Type' => 'text/plain'));
-                    $response->end("");
-                }
+                });
             });
             $socket->listen($this->webserverPort);
         }
