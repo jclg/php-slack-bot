@@ -21,6 +21,8 @@ Then run
 
 ## Usage
 
+Create a php file called `bot.php` with the following content
+
 ```php
 require 'vendor/autoload.php';
 use PhpSlackBot\Bot;
@@ -41,8 +43,11 @@ class MyCommand extends \PhpSlackBot\Command\BaseCommand {
 $bot = new Bot();
 $bot->setToken('TOKEN'); // Get your token here https://my.slack.com/services/new/bot
 $bot->loadCommand(new MyCommand());
+$bot->loadInternalCommands(); // This loads example commands
 $bot->run();
 ```
+
+Then run `php bot.php` from the command line (terminal).
 
 ## Example commands
 
