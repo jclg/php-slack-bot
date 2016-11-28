@@ -180,20 +180,24 @@ class Bot {
     }
 
     private function getCommand($data) {
-        if (isset($data['text'])) {
-            $argsOffset = 0;
-            if (strpos($data['text'], '<@'.$this->context['self']['id'].'>') === 0) {
-                $argsOffset = 1;
-            }
-            $args = array_values(array_filter(explode(' ', $data['text'])));
-            if (isset($args[$argsOffset])) {
-                foreach ($this->commands as $commandName => $availableCommand) {
-                    if ($args[$argsOffset] == $commandName) {
-                        return $this->commands[$commandName];
-                    }
-                }
+        if (empty($data['text'])) {
+            return null;
+        }
+
+        $find = '/^'.preg_quote('<@'.$this->context['self']['id'].'>', '/').'[ ]*/';
+        $text = preg_replace($find, '', $data['text']);
+
+        if (empty($text)) {
+            return null;
+        }
+
+        foreach ($this->commands as $commandName => $availableCommand) {
+            $find = '/^'.preg_quote($commandName).'/';
+            if (preg_match($find, $text)) {
+                return $availableCommand;
             }
         }
+
         return null;
     }
 
