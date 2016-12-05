@@ -2,6 +2,7 @@
     "name": "jclg/php-slack-bot",
     "description": "Slack bot user written in PHP",
     "homepage": "https://github.com/jclg/php-slack-bot",
+    "license": "MIT",
     "require": {
         "devristo/phpws": "dev-master",
         "react/http": "^0.4"
