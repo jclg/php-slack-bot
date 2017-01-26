@@ -70,6 +70,25 @@ abstract class Base {
         return $username;
     }
 
+    /**
+     * Get user id in slack by slack username
+     *
+     * @param $userName
+     * @return string
+     */
+    protected function getUserIdFromUserName($userName)
+    {
+        $userId = null;
+        foreach ($this->context['users'] as $user) {
+            if ($user['name'] == $userName) {
+                $userId = $user['id'];
+                break;
+            }
+        }
+
+        return $userId;
+    }
+
     protected function getChannelIdFromChannelName($channelName) {
         $channelName = str_replace('#', '', $channelName);
         foreach ($this->context['channels'] as $channel) {
