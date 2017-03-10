@@ -70,6 +70,17 @@ abstract class Base {
         return $username;
     }
 
+	protected function getUserIdFromUserName($userName) {
+		$userId = '';
+		$userName = str_replace('@', '', $userName);
+		foreach ($this->context['users'] as $user) {
+			if ($user['name'] == $userName) {
+				$userId = $user['id'];
+			}
+		}
+		return $userId;
+	}
+
     protected function getChannelIdFromChannelName($channelName) {
         $channelName = str_replace('#', '', $channelName);
         foreach ($this->context['channels'] as $channel) {
