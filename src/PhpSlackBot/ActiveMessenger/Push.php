@@ -4,42 +4,49 @@ namespace PhpSlackBot\ActiveMessenger;
 use PhpSlackBot\Base;
 
 class Push extends Base {
-
-	public function sendMessage($channel, $username, $message) {
-//		$channelId = $this->getChannelIdFromChannelName($channel);
-//		if(!$channelId) {
-//			// Did not find the channel in list of channels. Try Direct messages
-
+	/**
+	 * @param string $channelOrUsername  Channel name (not Channel ID assigned by Slack) to which message is to be sent.
+	 *                                   Usernames can also be passed.
+	 *                                   Channel names should have the '#' prefix. Usernames MUST have the '@' prefix
+	 * @param string $usernameForMention If a user is to be mentioned in a message.
+	 * @param string $message            Actual message to be sent
+	 *
+	 * @throws \Exception
+	 */
+	public function sendMessage($channelOrUsername, $usernameForMention, $message) {
 		// See the first character
-		if(strpos($channel, '@') === 0) {
+		if(strpos($channelOrUsername, '@') === 0) {
 			// User's name was requested
-			$userId = $this->getUserIdFromUserName($channel);
+			$userId = $this->getUserIdFromUserName($channelOrUsername);
 			$channelId = $this->getImIdFromUserId($userId);
-		} elseif(strpos($channel, '#') === 0) {
+		} elseif(strpos($channelOrUsername, '#') === 0) {
 			// Channel requested
-			$channelId = $this->getChannelIdFromChannelName($channel);
+			$channelId = $this->getChannelIdFromChannelName($channelOrUsername);
 		} else {
 			// Neither user not channel requested
 			// NOTE: We assume it to be a channel name
-			$channelId = $this->getChannelIdFromChannelName($channel);
+			$channelId = $this->getChannelIdFromChannelName($channelOrUsername);
 		}
 
+		$usernameToSend = $this->getUserIdFromUserName($usernameForMention);
+		if(!$usernameToSend) {
+			$usernameToSend = null;
+		}
 
-			$usernameToSend = $this->getUserIdFromUserName($username);
-			if(!$usernameToSend)
-				$usernameToSend = null;
-//		}
-		if($channelId)
-        $this->send($channelId, $usernameToSend, $message);
-		else
-			echo "\n\n SAKINAKA \n\n";
+		if ($channelId) {
+			$this->send($channelId, $usernameToSend, $message);
+		} else {
+			throw new \Exception('Cannot resolve channel ID to to send the message');
+		}
     }
 
-    protected function configure() {
-	    // TODO: Implement configure() method.
-    }
+	/**
+	 * This method is defined here only to satisfy the requirements for extending an abstract class
+	 */
+    protected function configure() {}
 
-    public function execute($message, $context) {
-	    // TODO: Implement execute() method.
-    }
+	/**
+	 * This method is defined here only to satisfy the requirements for extending an abstract class
+	 */
+    public function execute($message, $context) {}
 }

@@ -1,4 +1,5 @@
 *~
+.idea/
 bot.php
 composer.phar
 composer.lock
