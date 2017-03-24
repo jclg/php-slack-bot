@@ -14,6 +14,11 @@ class Push extends Base {
 	 * @throws \Exception
 	 */
 	public function sendMessage($channelOrUsername, $usernameForMention, $message) {
+		// if the channelOrUsername is set to null, then do not send the message
+		if(!$channelOrUsername) {
+			return;
+		}
+
 		// See the first character
 		if(strpos($channelOrUsername, '@') === 0) {
 			// User's name was requested
