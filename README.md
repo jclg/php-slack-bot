@@ -142,3 +142,17 @@ Then, use the parameter "name" to trigger the corresponding webhook :
 ```
 curl -X POST --data-urlencode 'auth=secret' --data-urlencode 'name=output' --data-urlencode 'payload={"type" : "message", "text": "This is a message", "channel": "#general"}' http://localhost:8080
 ```
+
+## Running the bot as a daemon
+
+To run the bot in the background as a daemon you can use the [slackbot service script](init.d/slackbotservice). 
+
+Configure the `DAEMON` and `DAEMON_OPTS` variables, move it to the `/etc/init.d/slackbotservice` and in the end make it executable:
+ 
+ ```chmod +x /etc/init.d/slackbotservice```
+  
+Now you can start and stop the slackbot by running:
+  
+  ```service slackbotservice start``` (or `/etc/init.d/slackbotservice start`)  
+  and  
+  ```service slackbotservice stop``` (or `/etc/init.d/slackbotservice stop`)
