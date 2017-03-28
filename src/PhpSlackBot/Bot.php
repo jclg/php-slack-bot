@@ -218,6 +218,12 @@ class Bot {
             return null;
         }
 
+        // Check if bot is mentioned
+        $botMention = false;
+        if (strpos($data['text'], '<@'.$this->context['self']['id'].'>') !== false) {
+            $botMention = true;
+        }
+
         $find = '/^'.preg_quote('<@'.$this->context['self']['id'].'>', '/').'[ ]*/';
         $text = preg_replace($find, '', $data['text']);
 
@@ -227,7 +233,8 @@ class Bot {
 
         foreach ($this->commands as $commandName => $availableCommand) {
             $find = '/^'.preg_quote($commandName).'/';
-            if (preg_match($find, $text)) {
+            if (preg_match($find, $text) &&
+                (!$availableCommand->getMentionOnly() || $botMention)) {
                 return $availableCommand;
             }
         }
