@@ -11,6 +11,8 @@ class Bot {
     private $webserverPort = null;
     private $webserverAuthentificationToken = null;
     private $catchAllCommands = array();
+    private $pushNotifiers = array();
+    private $activeMessenger = null;
 
     public function setToken($token) {
         $this->params = array('token' => $token);
@@ -46,6 +48,14 @@ class Bot {
     public function enableWebserver($port, $authentificationToken = null) {
         $this->webserverPort = $port;
         $this->authentificationToken = $authentificationToken;
+    }
+
+    public function loadPushNotifier($method, $repeatInterval = null) {
+    	if(is_callable($method)) {
+		    $this->pushNotifiers[] = ['interval' => (int)$repeatInterval, 'method' => $method];
+	    } else {
+		    throw new \Exception('Closure passed as push notifier is not callable.');
+	    }
     }
 
     public function run() {
@@ -94,9 +104,6 @@ class Bot {
             }
         });
 
-
-        $client->open();
-
         /* Webserver */
         if (null !== $this->webserverPort) {
             $logger->notice("Listening on port ".$this->webserverPort);
@@ -129,6 +136,33 @@ class Bot {
             });
             $socket->listen($this->webserverPort);
         }
+
+        /* Notifiers */
+
+        if(!$this->activeMessenger) {
+        	$this->activeMessenger = new ActiveMessenger\Push();
+        	$this->activeMessenger->setContext($this->context);
+        	$this->activeMessenger->setClient($client);
+        }
+	    foreach ($this->pushNotifiers as $notifierArray) {
+	    	if($notifierArray['interval'] != 0) {
+	    		$loop->addPeriodicTimer($notifierArray['interval'], function () use ($notifierArray) {
+	    			if($this->activeMessenger instanceof ActiveMessenger\Push) {
+					    $resultArray = call_user_func($notifierArray['method']);
+					    $this->activeMessenger->sendMessage($resultArray['channel'], $resultArray['username'], $resultArray['message']);
+				    }
+			    });
+		    } else {
+			    $loop->addTimer(10, function () use ($notifierArray) {
+				    if($this->activeMessenger instanceof ActiveMessenger\Push) {
+					    $resultArray = call_user_func($notifierArray['method']);
+					    $this->activeMessenger->sendMessage($resultArray['channel'], $resultArray['username'], $resultArray['message']);
+				    }
+			    });
+		    }
+        }
+
+	    $client->open();
 
         $loop->run();
     }
