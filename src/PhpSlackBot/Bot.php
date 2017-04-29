@@ -97,8 +97,12 @@ class Bot {
             $command = $this->getCommand($data);
             if ($command instanceof Command\BaseCommand) {
                 $command->setClient($client);
-                $command->setChannel($data['channel']);
-                $command->setUser($data['user']);
+                if (isset($data['channel'])) {
+                    $command->setChannel($data['channel']);
+                }
+                if (isset($data['user'])) {
+                    $command->setUser($data['user']);
+                }
                 $command->setContext($this->context);
                 $command->executeCommand($data, $this->context);
             }
