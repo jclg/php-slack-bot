@@ -7,6 +7,7 @@ abstract class Base {
     private $user;
     private $context;
     private $mentionOnly = false;
+    private $channel;
     abstract protected function configure();
     abstract protected function execute($message, $context);
 
