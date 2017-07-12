@@ -60,13 +60,16 @@ abstract class Base {
         return $this->channel;
     }
 
-    protected function send($channel, $username, $message) {
+    protected function send($channel, $username, $message, $parent_thread = null) {
         $response = array(
                           'id' => time(),
                           'type' => 'message',
                           'channel' => $channel,
                           'text' => (!is_null($username) ? '<@'.$username.'> ' : '').$message
                           );
+        if ($parent_thread) {
+            $response['thread_ts'] = $parent_thread;
+        }
         $this->client->send(json_encode($response));
     }
 
