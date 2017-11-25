@@ -4,7 +4,7 @@
     "homepage": "https://github.com/jclg/php-slack-bot",
     "license": "MIT",
     "require": {
-        "devristo/phpws": "dev-master@dev",
+        "semako/phpws": "1.0.1",
         "react/http": "^0.4"
     },
     "authors": [
