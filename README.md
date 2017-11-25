@@ -5,19 +5,7 @@ A simple bot user written in PHP using the Slack Real Time Messaging API https:/
 ## Installation
 With Composer
 
-
-Create a new composer.json file and add the following
-
-    {
-        "minimum-stability" : "dev",
-        "require": {
-            "jclg/php-slack-bot": "dev-master"
-        }
-    }
-
-Then run
-
-    composer install
+    composer require jclg/php-slack-bot
 
 ## Usage
 
