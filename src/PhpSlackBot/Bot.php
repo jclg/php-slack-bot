@@ -9,6 +9,7 @@ class Bot {
     private $commands = array();
     private $webhooks = array();
     private $webserverPort = null;
+    private $webserverHost = null;
     private $webserverAuthentificationToken = null;
     private $catchAllCommands = array();
     private $pushNotifiers = array();
@@ -45,9 +46,10 @@ class Bot {
         }
     }
 
-    public function enableWebserver($port, $authentificationToken = null) {
+    public function enableWebserver($port, $authentificationToken = null, $host = '127.0.0.1') {
         $this->webserverPort = $port;
-        $this->authentificationToken = $authentificationToken;
+        $this->webserverAuthentificationToken = $authentificationToken;
+        $this->webserverHost = $host;
     }
 
     public function loadPushNotifier($method, $repeatInterval = null) {
@@ -116,9 +118,9 @@ class Bot {
             $http->on('request', function ($request, $response) use ($client) {
                 $request->on('data', function($data) use ($client, $request, $response) {
                     parse_str($data, $post);
-                    if ($this->authentificationToken === null || ($this->authentificationToken !== null &&
+                    if ($this->webserverAuthentificationToken === null || ($this->webserverAuthentificationToken !== null &&
                                                                   isset($post['auth']) &&
-                                                                  $post['auth'] === $this->authentificationToken)) {
+                                                                  $post['auth'] === $this->webserverAuthentificationToken)) {
                         if (isset($post['name']) && is_string($post['name']) && isset($this->webhooks[$post['name']])) {
                             $hook = $this->webhooks[$post['name']];
                             $hook->setClient($client);
@@ -138,7 +140,7 @@ class Bot {
                     }
                 });
             });
-            $socket->listen($this->webserverPort);
+            $socket->listen($this->webserverPort, $this->webserverHost);
         }
 
         /* Notifiers */
