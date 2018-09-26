@@ -1,14 +1,16 @@
 <?php
 namespace PhpSlackBot\Command;
 
-class PingPongCommand extends BaseCommand {
+class PingPongCommand extends BaseCommand
+{
 
-    protected function configure() {
+    protected function configure()
+    {
         $this->setName('ping');
     }
 
-    protected function execute($message, $context) {
+    protected function execute($message, $context)
+    {
         $this->send($this->getCurrentChannel(), $this->getCurrentUser(), 'Pong');
     }
-
 }
