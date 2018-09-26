@@ -62,7 +62,7 @@ class Bot {
     public function run() {
         if (!isset($this->params['token'])) {
             throw new \Exception('A token must be set. Please see https://my.slack.com/services/new/bot');
-	}
+        }
 
         $this->init();
         $logger = $this->logger;
