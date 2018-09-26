@@ -14,6 +14,7 @@ class Bot {
     private $catchAllCommands = array();
     private $pushNotifiers = array();
     private $activeMessenger = null;
+    protected $logger = null;
 
     public function setToken($token) {
         $this->params = array('token' => $token);
@@ -64,10 +65,9 @@ class Bot {
         if (!isset($this->params['token'])) {
             throw new \Exception('A token must be set. Please see https://my.slack.com/services/new/bot');
         }
+
         $this->init();
-        $logger = new \Zend\Log\Logger();
-        $writer = new \Zend\Log\Writer\Stream("php://output");
-        $logger->addWriter($writer);
+        $logger = $this->logger;
 
         $loop = \React\EventLoop\Factory::create();
         $client = new \Devristo\Phpws\Client\WebSocket($this->wsUrl, $loop, $logger);
@@ -173,7 +173,17 @@ class Bot {
         $loop->run();
     }
 
-    private function init() {
+    public function initLogger(\Zend\Log\LoggerInterface $logger = null) {
+        if(! is_null($logger)) {
+            $this->logger = $logger;
+        } else {	
+            $this->logger = new \Zend\Log\Logger();
+            $writer = new \Zend\Log\Writer\Stream("php://output");
+            $this->logger->addWriter($writer);
+        }
+    }
+
+    private function init(\Zend\Log\LoggerInterface $logger = null) {
         $url = 'https://slack.com/api/rtm.start';
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url.'?'.http_build_query($this->params));
@@ -192,6 +202,10 @@ class Bot {
             throw new \Exception($response['error']);
         }
         $this->wsUrl = $response['url'];
+
+        if(is_null($logger)) {
+            $this->initLogger();
+        }
     }
 
     public function loadInternalCommands() {
