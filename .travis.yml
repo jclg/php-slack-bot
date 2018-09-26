@@ -3,7 +3,7 @@ php:
   - '7.1'
 before_script:
   # PHP_CodeSniffer
-  - pyrus install pear/PHP_CodeSniffer
+  - pear install pear/PHP_CodeSniffer
   - phpenv rehash
 script:
   - phpcs --standard=PSR2 src/
