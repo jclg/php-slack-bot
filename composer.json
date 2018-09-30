@@ -5,7 +5,8 @@
     "license": "MIT",
     "require": {
         "semako/phpws": "1.0.1",
-        "react/http": "^0.4"
+        "react/http": "^0.4",
+        "ext-curl": "*"
     },
     "authors": [
         {
