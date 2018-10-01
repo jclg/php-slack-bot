@@ -1,7 +1,8 @@
 <?php
 namespace PhpSlackBot;
 
-abstract class Base {
+abstract class Base
+{
     private $name;
     private $client;
     private $user;
@@ -11,56 +12,69 @@ abstract class Base {
     abstract protected function configure();
     abstract protected function execute($message, $context);
 
-    public function getName() {
+    public function getName()
+    {
         $this->configure();
         return $this->name;
     }
 
-    public function getClient() {
+    public function getClient()
+    {
         return $this->client;
     }
 
-    public function getMentionOnly() {
+    public function getMentionOnly()
+    {
         return $this->mentionOnly;
     }
 
-    public function setMentionOnly($mentionOnly) {
+    public function setMentionOnly($mentionOnly)
+    {
         $this->mentionOnly = $mentionOnly;
     }
 
-    public function setName($name) {
+    public function setName($name)
+    {
         $this->name = $name;
     }
 
-    public function setClient($client) {
+    public function setClient($client)
+    {
         $this->client = $client;
     }
 
-    public function setChannel($channel) {
+    public function setChannel($channel)
+    {
         $this->channel = $channel;
     }
 
-    public function setUser($user) {
+    public function setUser($user)
+    {
         $this->user = $user;
     }
 
-    public function getCurrentUser() {
+    public function getCurrentUser()
+    {
         return $this->user;
     }
 
-    public function setContext($context) {
+    public function setContext($context)
+    {
         $this->context = $context;
     }
 
-    public function getCurrentContext() {
+    public function getCurrentContext()
+    {
         return $this->context;
     }
 
-    public function getCurrentChannel() {
+    public function getCurrentChannel()
+    {
         return $this->channel;
     }
 
-    protected function send($channel, $username, $message, $parent_thread = null) {
+    protected function send($channel, $username, $message, $parent_thread = null)
+    {
         $response = array(
                           'id' => time(),
                           'type' => 'message',
@@ -73,7 +87,8 @@ abstract class Base {
         $this->client->send(json_encode($response));
     }
 
-    protected function getUserNameFromUserId($userId) {
+    protected function getUserNameFromUserId($userId)
+    {
         $username = 'unknown';
         foreach ($this->context['users'] as $user) {
             if ($user['id'] == $userId) {
@@ -83,18 +98,20 @@ abstract class Base {
         return $username;
     }
 
-	protected function getUserIdFromUserName($userName) {
-		$userId = '';
-		$userName = str_replace('@', '', $userName);
-		foreach ($this->context['users'] as $user) {
-			if ($user['name'] == $userName) {
-				$userId = $user['id'];
-			}
-		}
-		return $userId;
-	}
+    protected function getUserIdFromUserName($userName)
+    {
+        $userId = '';
+        $userName = str_replace('@', '', $userName);
+        foreach ($this->context['users'] as $user) {
+            if ($user['name'] == $userName) {
+                $userId = $user['id'];
+            }
+        }
+        return $userId;
+    }
 
-    protected function getChannelIdFromChannelName($channelName) {
+    protected function getChannelIdFromChannelName($channelName)
+    {
         $channelName = str_replace('#', '', $channelName);
         foreach ($this->context['channels'] as $channel) {
             if ($channel['name'] == $channelName) {
@@ -109,7 +126,8 @@ abstract class Base {
         return false;
     }
 
-    protected function getChannelNameFromChannelId($channelId) {
+    protected function getChannelNameFromChannelId($channelId)
+    {
         foreach ($this->context['channels'] as $channel) {
             if ($channel['id'] == $channelId) {
                 return $channel['name'];
@@ -123,7 +141,8 @@ abstract class Base {
         return false;
     }
 
-    protected function getImIdFromUserId($userId) {
+    protected function getImIdFromUserId($userId)
+    {
         foreach ($this->context['ims'] as $im) {
             if ($im['user'] == $userId) {
                 return $im['id'];
@@ -131,5 +150,4 @@ abstract class Base {
         }
         return false;
     }
-
 }

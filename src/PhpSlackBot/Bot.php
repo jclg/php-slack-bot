@@ -1,7 +1,8 @@
 <?php
 namespace PhpSlackBot;
 
-class Bot {
+class Bot
+{
 
     private $params = array();
     private $context = array();
@@ -9,90 +10,96 @@ class Bot {
     private $commands = array();
     private $webhooks = array();
     private $webserverPort = null;
+    private $webserverHost = null;
     private $webserverAuthentificationToken = null;
     private $catchAllCommands = array();
     private $pushNotifiers = array();
     private $activeMessenger = null;
+    protected $logger = null;
 
-    public function setToken($token) {
+    public function setToken($token)
+    {
         $this->params = array('token' => $token);
     }
 
-    public function loadCommand($command) {
+    public function loadCommand($command)
+    {
         if ($command instanceof Command\BaseCommand) {
             $this->commands[$command->getName()] = $command;
-        }
-        else {
+        } else {
             throw new \Exception('Command must implement PhpSlackBot\Command\BaseCommand');
         }
     }
 
-    public function loadWebhook($webhook) {
+    public function loadWebhook($webhook)
+    {
         if ($webhook instanceof Webhook\BaseWebhook) {
             $this->webhooks[$webhook->getName()] = $webhook;
-        }
-        else {
+        } else {
             throw new \Exception('Webhook must implement PhpSlackBot\Webhook\BaseWebhook');
         }
     }
 
-    public function loadCatchAllCommand($command) {
+    public function loadCatchAllCommand($command)
+    {
         if ($command instanceof Command\BaseCommand) {
             $this->catchAllCommands[] = $command;
-        }
-        else {
+        } else {
             throw new \Exception('Command must implement PhpSlackBot\Command\BaseCommand');
         }
     }
 
-    public function enableWebserver($port, $authentificationToken = null) {
+    public function enableWebserver($port, $authentificationToken = null, $host = '127.0.0.1')
+    {
         $this->webserverPort = $port;
-        $this->authentificationToken = $authentificationToken;
+        $this->webserverAuthentificationToken = $authentificationToken;
+        $this->webserverHost = $host;
     }
 
-    public function loadPushNotifier($method, $repeatInterval = null) {
-    	if(is_callable($method)) {
-		    $this->pushNotifiers[] = ['interval' => (int)$repeatInterval, 'method' => $method];
-	    } else {
-		    throw new \Exception('Closure passed as push notifier is not callable.');
-	    }
+    public function loadPushNotifier($method, $repeatInterval = null)
+    {
+        if (is_callable($method)) {
+            $this->pushNotifiers[] = ['interval' => (int)$repeatInterval, 'method' => $method];
+        } else {
+            throw new \Exception('Closure passed as push notifier is not callable.');
+        }
     }
 
-    public function run() {
+    public function run()
+    {
         if (!isset($this->params['token'])) {
             throw new \Exception('A token must be set. Please see https://my.slack.com/services/new/bot');
         }
+
         $this->init();
-        $logger = new \Zend\Log\Logger();
-        $writer = new \Zend\Log\Writer\Stream("php://output");
-        $logger->addWriter($writer);
+        $logger = $this->logger;
 
         $loop = \React\EventLoop\Factory::create();
         $client = new \Devristo\Phpws\Client\WebSocket($this->wsUrl, $loop, $logger);
 
-        $client->on("request", function($headers) use ($logger){
+        $client->on("request", function ($headers) use ($logger) {
                 $logger->notice("Request object created!");
         });
 
-        $client->on("handshake", function() use ($logger) {
+        $client->on("handshake", function () use ($logger) {
                 $logger->notice("Handshake received!");
         });
 
-        $client->on("connect", function() use ($logger, $client){
+        $client->on("connect", function () use ($logger, $client) {
                 $logger->notice("Connected!");
         });
 
-        $client->on("message", function($message) use ($client, $logger){
+        $client->on("message", function ($message) use ($client, $logger) {
             $data = $message->getData();
             $logger->notice("Got message: ".$data);
             $data = json_decode($data, true);
 
             if (count($this->catchAllCommands)) {
-              foreach ($this->catchAllCommands as $command) {
-                $command->setClient($client);
-                $command->setContext($this->context);
-                $command->executeCommand($data, $this->context);
-              }
+                foreach ($this->catchAllCommands as $command) {
+                    $command->setClient($client);
+                    $command->setContext($this->context);
+                    $command->executeCommand($data, $this->context);
+                }
             }
             $command = $this->getCommand($data);
             if ($command instanceof Command\BaseCommand) {
@@ -114,11 +121,12 @@ class Bot {
             $socket = new \React\Socket\Server($loop);
             $http = new \React\Http\Server($socket);
             $http->on('request', function ($request, $response) use ($client) {
-                $request->on('data', function($data) use ($client, $request, $response) {
+                $request->on('data', function ($data) use ($client, $request, $response) {
                     parse_str($data, $post);
-                    if ($this->authentificationToken === null || ($this->authentificationToken !== null &&
-                                                                  isset($post['auth']) &&
-                                                                  $post['auth'] === $this->authentificationToken)) {
+                    if ($this->webserverAuthentificationToken === null ||
+                        ($this->webserverAuthentificationToken !== null &&
+                         isset($post['auth']) &&
+                         $post['auth'] === $this->webserverAuthentificationToken)) {
                         if (isset($post['name']) && is_string($post['name']) && isset($this->webhooks[$post['name']])) {
                             $hook = $this->webhooks[$post['name']];
                             $hook->setClient($client);
@@ -126,52 +134,70 @@ class Bot {
                             $hook->executeWebhook(json_decode($post['payload'], true), $this->context);
                             $response->writeHead(200, array('Content-Type' => 'text/plain'));
                             $response->end("Ok\n");
-                        }
-                        else {
+                        } else {
                             $response->writeHead(404, array('Content-Type' => 'text/plain'));
                             $response->end("No webhook found\n");
                         }
-                    }
-                    else {
+                    } else {
                         $response->writeHead(403, array('Content-Type' => 'text/plain'));
                         $response->end("");
                     }
                 });
             });
-            $socket->listen($this->webserverPort);
+            $socket->listen($this->webserverPort, $this->webserverHost);
         }
 
         /* Notifiers */
 
-        if(!$this->activeMessenger) {
-        	$this->activeMessenger = new ActiveMessenger\Push();
-        	$this->activeMessenger->setContext($this->context);
-        	$this->activeMessenger->setClient($client);
+        if (!$this->activeMessenger) {
+            $this->activeMessenger = new ActiveMessenger\Push();
+            $this->activeMessenger->setContext($this->context);
+            $this->activeMessenger->setClient($client);
         }
-	    foreach ($this->pushNotifiers as $notifierArray) {
-	    	if($notifierArray['interval'] != 0) {
-	    		$loop->addPeriodicTimer($notifierArray['interval'], function () use ($notifierArray) {
-	    			if($this->activeMessenger instanceof ActiveMessenger\Push) {
-					    $resultArray = call_user_func($notifierArray['method']);
-					    $this->activeMessenger->sendMessage($resultArray['channel'], $resultArray['username'], $resultArray['message']);
-				    }
-			    });
-		    } else {
-			    $loop->addTimer(10, function () use ($notifierArray) {
-				    if($this->activeMessenger instanceof ActiveMessenger\Push) {
-					    $resultArray = call_user_func($notifierArray['method']);
-					    $this->activeMessenger->sendMessage($resultArray['channel'], $resultArray['username'], $resultArray['message']);
-				    }
-			    });
-		    }
+        foreach ($this->pushNotifiers as $notifierArray) {
+            if ($notifierArray['interval'] != 0) {
+                $loop->addPeriodicTimer($notifierArray['interval'], function () use ($notifierArray) {
+                    if ($this->activeMessenger instanceof ActiveMessenger\Push) {
+                        $resultArray = call_user_func($notifierArray['method']);
+                        $this->activeMessenger->sendMessage(
+                            $resultArray['channel'],
+                            $resultArray['username'],
+                            $resultArray['message']
+                        );
+                    }
+                });
+            } else {
+                $loop->addTimer(10, function () use ($notifierArray) {
+                    if ($this->activeMessenger instanceof ActiveMessenger\Push) {
+                        $resultArray = call_user_func($notifierArray['method']);
+                        $this->activeMessenger->sendMessage(
+                            $resultArray['channel'],
+                            $resultArray['username'],
+                            $resultArray['message']
+                        );
+                    }
+                });
+            }
         }
 
-	    $client->open();
+        $client->open();
 
         $loop->run();
     }
 
-    private function init() {
+    public function initLogger(\Zend\Log\LoggerInterface $logger = null)
+    {
+        if (! is_null($logger)) {
+            $this->logger = $logger;
+        } else {
+            $this->logger = new \Zend\Log\Logger();
+            $writer = new \Zend\Log\Writer\Stream("php://output");
+            $this->logger->addWriter($writer);
+        }
+    }
+
+    private function init(\Zend\Log\LoggerInterface $logger = null)
+    {
         $url = 'https://slack.com/api/rtm.start';
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url.'?'.http_build_query($this->params));
@@ -190,9 +216,14 @@ class Bot {
             throw new \Exception($response['error']);
         }
         $this->wsUrl = $response['url'];
+
+        if (is_null($logger)) {
+            $this->initLogger();
+        }
     }
 
-    public function loadInternalCommands() {
+    public function loadInternalCommands()
+    {
         $commands = array(
                           new \PhpSlackBot\Command\PingPongCommand,
                           new \PhpSlackBot\Command\CountCommand,
@@ -206,7 +237,8 @@ class Bot {
         }
     }
 
-    public function loadInternalWebhooks() {
+    public function loadInternalWebhooks()
+    {
         $webhooks = array(
                           new \PhpSlackBot\Webhook\OutputWebhook,
                           );
@@ -217,7 +249,8 @@ class Bot {
         }
     }
 
-    private function getCommand($data) {
+    private function getCommand($data)
+    {
         if (empty($data['text'])) {
             return null;
         }
@@ -245,5 +278,4 @@ class Bot {
 
         return null;
     }
-
 }

@@ -1,15 +1,17 @@
 <?php
 namespace PhpSlackBot\Webhook;
 
-class OutputWebhook extends BaseWebhook {
+class OutputWebhook extends BaseWebhook
+{
 
-    protected function configure() {
+    protected function configure()
+    {
         $this->setName('output');
     }
 
-    protected function execute($payload, $context) {
+    protected function execute($payload, $context)
+    {
         $payload['channel'] = $this->getChannelIdFromChannelName($payload['channel']);
         $this->getClient()->send(json_encode($payload));
     }
-
 }
