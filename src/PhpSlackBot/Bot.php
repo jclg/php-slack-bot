@@ -217,7 +217,8 @@ class Bot
         }
         $this->wsUrl = $response['url'];
 
-        if(is_null($this->logger) && is_null($logger)) {
+        if( is_null($this->logger) && is_null($logger)) 
+        {
             $this->initLogger();
         }
     }
