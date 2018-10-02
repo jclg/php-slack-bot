@@ -270,6 +270,10 @@ class Bot
 
         foreach ($this->commands as $commandName => $availableCommand) {
             $find = '/^'.preg_quote($commandName).'/';
+            if ($availableCommand->getCaseInsensitive()) {
+                $find .= 'i';
+            }
+
             if (preg_match($find, $text) &&
                 (!$availableCommand->getMentionOnly() || $botMention)) {
                 return $availableCommand;

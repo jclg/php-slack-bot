@@ -9,6 +9,7 @@ abstract class Base
     private $context;
     private $mentionOnly = false;
     private $channel;
+    private $caseInsensitive = false;
     abstract protected function configure();
     abstract protected function execute($message, $context);
 
@@ -71,6 +72,16 @@ abstract class Base
     public function getCurrentChannel()
     {
         return $this->channel;
+    }
+
+    public function setCaseInsensitive($caseInsensitive)
+    {
+        $this->caseInsensitive = $caseInsensitive;
+    }
+
+    public function getCaseInsensitive()
+    {
+        return $this->caseInsensitive;
     }
 
     protected function send($channel, $username, $message, $parent_thread = null)
