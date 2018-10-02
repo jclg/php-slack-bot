@@ -270,7 +270,7 @@ class Bot
 
         foreach ($this->commands as $commandName => $availableCommand) {
             $find = '/^'.preg_quote($commandName).'/';
-            if($availableCommand->getCaseInsensitive()) {
+            if ($availableCommand->getCaseInsensitive()) {
                 $find .= 'i';
             }
 
