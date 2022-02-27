@@ -1,5 +1,5 @@
 {
-    "name": "jclg/php-slack-bot",
+    "name": "flovnst/php-slack-bot",
     "description": "Slack bot user written in PHP",
     "homepage": "https://github.com/jclg/php-slack-bot",
     "license": "MIT",
@@ -7,6 +7,10 @@
         {
             "name": "jclg",
             "email": "jeancharleslegoff@gmail.com"
+        },
+        {
+            "name": "flovnst",
+            "email": "florian.vaneste.pro@gmail.com"
         }
     ],
     "autoload": {
