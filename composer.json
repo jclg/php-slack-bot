@@ -3,6 +3,9 @@
     "description": "Slack bot user written in PHP",
     "homepage": "https://github.com/jclg/php-slack-bot",
     "license": "MIT",
+    "require": {
+        "php": "^7.4 || ^8.0"
+    },
     "authors": [
         {
             "name": "jclg",
