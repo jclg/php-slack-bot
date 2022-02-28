@@ -3,11 +3,8 @@
     "description": "Slack bot user written in PHP",
     "homepage": "https://github.com/FloVnst/php-slack-bot",
     "license": "MIT",
+    "type": "package",
     "authors": [
-        {
-            "name": "jclg",
-            "email": "jeancharleslegoff@gmail.com"
-        },
         {
             "name": "FloVnst",
             "email": "florian.vaneste.pro@gmail.com"
