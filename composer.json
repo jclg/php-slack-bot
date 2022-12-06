@@ -6,8 +6,8 @@
     "type": "package",
     "authors": [
         {
-            "name": "FloVnst",
-            "email": "florian.vaneste.pro@gmail.com"
+            "name": "jclg",
+            "email": "jeancharleslegoff@gmail.com"
         }
     ],
     "autoload": {
